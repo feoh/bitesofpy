@@ -1,5 +1,3 @@
-from contextlib import contextmanager
-
 class Account:
 
     def __init__(self):
@@ -15,14 +13,13 @@ class Account:
     def __sub__(self, amount):
         self._transactions.append(-amount)
 
-    @contextmanager
-    def __account__(self, *args, **kwargs):
-        old_balance = self.balance
-        maybe_new_balance = old_balance + args
-        if maybe_new_balance >= 0:
-            yield maybe_new_balance
+    def __enter__(self):
+        return self
 
-        yield old_balance
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.balance < 0:
+            self._transactions.pop()
+            return True
 
     # add 2 dunder methods here to turn this class
     # into a 'rollback' context manager
