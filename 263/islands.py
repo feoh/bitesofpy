@@ -1,40 +1,37 @@
 # Constants to denote squares we've already processed.
-UNMARKED_ISLAND_SQUARE=1
-UNMARKED_EMPTY_SQUARE=0
-MARKED_ISLAND_SQUARE='#'
-MARKED_EMPTY_SQUARE='X'
+UNMARKED_ISLAND_SQUARE = 1
+UNMARKED_EMPTY_SQUARE = 0
+MARKED_ISLAND_SQUARE = '#'
+MARKED_EMPTY_SQUARE = 'X'
 
 
 def get_grid_square_count(grid):
     return sum([len(row) for row in grid])
 
 
-def check_around(row, column, grid):
+def check_same_island(row_index, column_index, grid):
     """
-    This method checks the squares to the left, right, above and below the current
-    already marked island grid square to see if there are any other connecting island
-    grid squares. If such are found they are returned as a list of row, column tuples.
+    This method returns True if a grid square above, below, left or right
+    from the one we were passed is a marked island grid square.
     """
+    above_index = row_index - 1
+    below_index = row_index + 1
+    left_index = column_index - 1
+    right_index = column_index + 1
 
-    connected_island_grid_squares = []
+    if (below_index < (len(grid) - 1)) and (grid[below_index][column_index] == UNMARKED_ISLAND_SQUARE):
+        return True
 
-    # Left
-    if column > 0 and grid[row][column - 1] == UNMARKED_ISLAND_SQUARE:
-        connected_island_grid_squares.append((row, column - 1))
+    if (above_index > 0) and (grid[above_index][column_index] == UNMARKED_ISLAND_SQUARE):
+        return True
 
-    # Right
-    if column < (len(grid[row] - 1)) and grid[row][column + 1] == UNMARKED_ISLAND_SQUARE:
-        connected_island_grid_squares.append((row, column + 1))
+    if left_index > 1 and (grid[row_index][left_index] == UNMARKED_ISLAND_SQUARE):
+        return True
 
-    # Above
-    if row > 0 and grid[row - 1][column] == UNMARKED_ISLAND_SQUARE:
-        connected_island_grid_squares.append((row - 1, column))
+    if right_index < len(grid[row_index]) and grid[row_index][right_index] == UNMARKED_ISLAND_SQUARE:
+        return True
 
-    # Below
-    if row < (len(grid) - 1) and grid[row + 1][column] == UNMARKED_ISLAND_SQUARE:
-        connected_island_grid_squares.append((row + 1, column))
-
-    return connected_island_grid_squares
+    return False
 
 
 def count_islands(grid):
@@ -51,30 +48,21 @@ def count_islands(grid):
             [0, 1, 0, 0],
             [1, 0, 0, 1]]
     """
-    islands = 0         # var. for the counts
+    islands = 0  # var. for the counts
 
-    current_row = 0
-    current_column = 0
-    grid_squares_searched = 0
+    for row_index in range(len(grid)):
+        for column_index in range(len(grid[row_index])):
+            if grid[row_index][column_index] == UNMARKED_EMPTY_SQUARE:
+                mark_empty(row_index, column_index, grid)
+            elif grid[row_index][column_index] == UNMARKED_ISLAND_SQUARE:
+                mark_islands(row_index, column_index, grid)
+                if not check_same_island(row_index, column_index, grid):
+                    islands += 1
 
-    grid_square_count = get_grid_square_count(grid)
-
-    while grid_squares_searched <= grid_square_count:
-        if grid[current_row][current_column] == UNMARKED_EMPTY_SQUARE:
-            mark_empty(current_row, current_column, grid)
-            grid_squares_searched += 1
-        elif grid[current_row][current_column] == UNMARKED_ISLAND_SQUARE:
-            mark_islands(current_row, current_column, grid)
-            grid_squares_searched += 1
-            islands += 1
-            connected_grid_squares = check_around(current_row, current_column, grid)
-            for connected_grid_square in connected_grid_squares:
-                mark_islands(connected_grid_square[0], connected_grid_square[1], grid)
-                grid_squares_searched += 1
-
-        elif grid[current_row][current_column] == MARKED_ISLAND_SQUARE or grid[current_row][current_column] == MARKED_EMPTY_SQUARE:
-            # The square has been marked and counted as searched already elsewhere.
-            continue
+            elif grid[row_index][column_index] == MARKED_ISLAND_SQUARE or grid[row_index][
+                column_index] == MARKED_EMPTY_SQUARE:
+                # The square has been marked and counted as searched already elsewhere.
+                continue
 
     return islands
 
@@ -93,5 +81,3 @@ def mark_islands(row, column, grid):
     Output: None. Just mark the visited islands as in-place operation.
     """
     grid[row][column] = '#'  # one way to mark visited ones - suggestion.
-
-
