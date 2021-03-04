@@ -11,35 +11,77 @@ class GridLocation(NamedTuple):
     row: int
     column: int
 
+Grid = List[List]
 
-def list_connected_island_squares(grid_location: GridLocation, grid: List[GridLocation]):
+
+def check_grid_square_above(grid_location: GridLocation, grid: Grid):
     """
-    This functions checks above, below, to the left and to the right of the supplied
-    grid square for unmarked island squares, returning each as a tuple of row, column coordinates.
-    grid_location -- named tuple with fields row, column.
+    Return true if the grid square above grid_location is an island.
+
+    Return False if it's not, or if we're at the grid border.
     """
 
-    above_index = grid_location.row - 1
-    below_index = grid_location.row + 1
-    left_index = grid_location.column - 1
-    right_index = grid_location.column + 1
-    grid_bottom = len(grid) - 1
+    if not(grid_locaation.row - 1):
+        return False
 
-    connected_island_squares: List[GridLocation] = []
+    return grid[grid_location.row - 1][grid_location.column] == UNMARKED_ISLAND_SQUARE
 
-    if (below_index < grid_bottom) and (grid[below_index][grid_location.column] == UNMARKED_ISLAND_SQUARE):
-        connected_island_squares.append((GridLocation(below_index, grid_location.column)))
 
-    if (above_index > 0) and (grid[above_index][grid_location.column] == UNMARKED_ISLAND_SQUARE):
-        connected_island_squares.append((GridLocation(above_index, grid_location.column)))
+def check_grid_square_below(grid_location: GridLocation, grid: Grid):
+    """
+    Return true if the grid square below grid_location is an island.
 
-    if left_index > 1 and (grid[grid_location.row][left_index] == UNMARKED_ISLAND_SQUARE):
-        connected_island_squares.append((GridLocation(grid_location.row, left_index)))
+    Return False if it's not, or if we're at the grid border.
+    """
+    if grid_location.row + 1 > get_grid_bottom(grid):
+        return False
 
-    if right_index < len(grid[grid_location.row]) and grid[grid_location.row][right_index] == UNMARKED_ISLAND_SQUARE:
-        connected_island_squares.append((GridLocation(grid_location.row, right_index)))
+    return grid[grid_location.row + 1][grid_location.column] == UNMARKED_ISLAND_SQUARE
 
-    return connected_island_squares
+
+def check_grid_square_right(grid_location: GridLocation, grid: Grid):
+    """
+    Return true if the grid square to the right is an island.
+
+    Return False if it's not, or if we're at the grid border.
+    """
+    if grid_location.column > len(grid[grid_location.row]):
+        return False
+
+    return grid_location.column + 1 == UNMARKED_ISLAND_SQUARE
+
+
+def get_grid_bottom(grid: Grid):
+    return len(grid)
+
+def mark_island_column(grid_location: GridLocation, grid: Grid):
+    """
+    This method marks heretofore unmarked island squares,
+    traveling down the column as it goes, until it finds
+    no more unmarked island grid squares to mark.
+    """
+
+    current_grid_location: GridLocation = grid_location
+
+    mark_island_square(grid_location, grid)
+
+    while check_grid_square_below(current_grid_location, grid):
+        current_grid_location = GridLocation(current_grid_location.row + 1, current_grid_location.column)
+        mark_island_square(current_grid_location, grid)
+
+
+def mark_whole_island(grid_location: GridLocation, grid: Grid):
+    """
+    This function does a depth first search of the graph of as yet unmarked
+    island grid squares connected to the initial island grid square passed
+    the 'grid_location' parameter.
+    """
+
+    mark_island_column(grid_location, grid)
+    current_grid_location: GridLocation = grid_location
+    while check_grid_square_right(current_grid_location, grid):
+        current_grid_location = GridLocation(current_grid_location.row, current_grid_location.column + 1)
+        mark_island_column(current_grid_location, grid)
 
 
 def count_islands(grid):
@@ -60,23 +102,12 @@ def count_islands(grid):
 
     for row_index in range(len(grid)):
         for column_index in range(len(grid[row_index])):
+            current_grid_location: GridLocation = GridLocation(row_index, column_index)
             if grid[row_index][column_index] == UNMARKED_EMPTY_SQUARE:
-                mark_empty(row_index, column_index, grid)
+                mark_empty(current_grid_location, grid)
             elif grid[row_index][column_index] == UNMARKED_ISLAND_SQUARE:
-                mark_islands(row_index, column_index, grid)
-                connected_island_squares = list_connected_island_squares(GridLocation(row_index, column_index), grid)
-                while connected_island_squares:
-                    found_connected_island_squares: List[GridLocation] = []
-                    for connected_island_square in connected_island_squares:
-                        mark_islands(connected_island_square.row, connected_island_square.column, grid)
-                        found_connected_island_squares.extend(list_connected_island_squares(connected_island_square,
-                                                                                            grid))
-
-                    connected_island_squares = found_connected_island_squares
-
-                # We've run out of connected island squares to process. So that's an island.
+                mark_whole_island(current_grid_location, grid)
                 islands += 1
-
             elif grid[row_index][column_index] == MARKED_ISLAND_SQUARE or \
                     grid[row_index][column_index] == MARKED_EMPTY_SQUARE:
                 # The square has been marked and counted as searched already elsewhere.
@@ -85,17 +116,19 @@ def count_islands(grid):
     return islands
 
 
-def mark_empty(row, column, grid):
+def mark_empty(grid_location: GridLocation, grid: Grid):
     """
     Input: the row, column and grid
     Output: None. Just mark the visited islands as in-place operation.
     """
-    grid[row][column] = 'X'  # one way to mark visited ones - suggestion.
+
+    grid[grid_location.row][grid_location.column] = MARKED_EMPTY_SQUARE
 
 
-def mark_islands(row, column, grid):
+def mark_island_square(grid_location: GridLocation, grid: Grid):
     """
     Input: the row, column and grid
     Output: None. Just mark the visited islands as in-place operation.
     """
-    grid[row][column] = '#'  # one way to mark visited ones - suggestion.
+
+    grid[grid_location.row][grid_location.column] = MARKED_ISLAND_SQUARE
