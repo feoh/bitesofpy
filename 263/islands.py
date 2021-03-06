@@ -52,7 +52,8 @@ def check_grid_square_right(grid_location: GridLocation, grid: Grid):
 
 
 def get_grid_bottom(grid: Grid):
-    return len(grid)
+    return len(grid) - 1
+
 
 def mark_island_column(grid_location: GridLocation, grid: Grid):
     """
