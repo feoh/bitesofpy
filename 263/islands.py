@@ -101,18 +101,13 @@ def count_islands(grid):
     """
     islands: int = 0  # var. for the counts
 
-    for row_index in range(len(grid)):
-        for column_index in range(len(grid[row_index])):
-            current_grid_location: GridLocation = GridLocation(row_index, column_index)
-            if grid[row_index][column_index] == UNMARKED_EMPTY_SQUARE:
-                mark_empty(current_grid_location, grid)
-            elif grid[row_index][column_index] == UNMARKED_ISLAND_SQUARE:
-                mark_whole_island(current_grid_location, grid)
-                islands += 1
-            elif grid[row_index][column_index] == MARKED_ISLAND_SQUARE or \
-                    grid[row_index][column_index] == MARKED_EMPTY_SQUARE:
-                # The square has been marked and counted as searched already elsewhere.
-                continue
+    for column_index in range(len(grid[row_index])):
+        current_grid_location: GridLocation = GridLocation(row_index, column_index)
+        if grid[row_index][column_index] == UNMARKED_EMPTY_SQUARE:
+            mark_empty(current_grid_location, grid)
+        elif grid[row_index][column_index] == UNMARKED_ISLAND_SQUARE:
+            mark_island_square(current_grid_location)
+            islands += 1
 
     return islands
 
