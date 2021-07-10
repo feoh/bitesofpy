@@ -5,7 +5,7 @@ BeltStats = namedtuple('BeltStats', 'score ninjas')
 ninja_belts = {'yellow': BeltStats(50, 11),
                'orange': BeltStats(100, 7),
                'green': BeltStats(175, 1),
-               'blue': BeltStats(250, 5)}
+               'blue': BeltStats(251, 5)}
 
 
 def get_total_points(belts=ninja_belts):
