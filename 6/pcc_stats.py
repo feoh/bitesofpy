@@ -44,7 +44,7 @@ def gen_files(tempfile=tempfile):
             (dir_name, dir_flag) = rest.split(',')
             is_dir = (dir_flag.rstrip('\n') == "True")
 
-            if is_dir:
+            if is_dir and (dir_name not in IGNORE):
                 yield f"{challenge_number}/{dir_name.lower()}"
 
 
@@ -65,4 +65,12 @@ def diehard_pybites(files=None):
     users = Counter()
     popular_challenges = Counter()
 
-    # your code
+    for file in files:
+        challenge, user = file.split('/')
+        users.update([user])
+        popular_challenges.update([challenge])
+
+    winning_user = users.most_common(1)[0]
+    winning_challenge = popular_challenges.most_common(1)[0]
+    winning_stats = Stats(user=winning_user[0], challenge=winning_challenge)
+    return winning_stats
