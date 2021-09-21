@@ -1,4 +1,5 @@
 import os
+import string
 import urllib.request
 from collections import Counter
 
@@ -27,7 +28,8 @@ def get_harry_most_common_word():
     stopwords = stopwords_stripped
 
     harry_words_raw = harry_string.split()
-    harry_words_lower = [word.lower() for word in harry_words_raw]
+    harry_words_no_punct = [word.translate(word.maketrans('','',string.punctuation)) for word in harry_words_raw]
+    harry_words_lower = [word.lower() for word in harry_words_no_punct]
 
     harry_words_no_stopwords = [word for word in harry_words_lower if word not in stopwords]
     harry_words_clean = [word for word in harry_words_no_stopwords if word.isalpha()]
