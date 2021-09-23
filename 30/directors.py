@@ -4,6 +4,7 @@ from collections import defaultdict, namedtuple
 import os
 from typing import List, Tuple, Any
 from urllib.request import urlretrieve
+import logging
 
 BASE_URL = 'https://bites-data.s3.us-east-2.amazonaws.com/'
 TMP = os.getenv("TMP", "/tmp")
@@ -19,9 +20,11 @@ MIN_YEAR = 1960
 
 Movie = namedtuple('Movie', 'title year score')
 
+
 def strip_unprintable(str):
     clean = [character for character in str if character.isprintable()]
     return "".join(clean)
+
 
 def get_movies_by_director():
     """Extracts all movies from csv and stores them in a dict,
@@ -33,11 +36,26 @@ def get_movies_by_director():
     movie_csv_dict_reader = csv.DictReader(mcsv)
 
     for movie_dict in movie_csv_dict_reader:
+        # This is gross but I can't find a more elegant way.
+        if not(movie_dict['director_name'] and
+               movie_dict['movie_title'] and
+               movie_dict['title_year'] and
+               movie_dict['imdb_score']):
+            logging.info(f"Discarding: {movie_dict['title_year']} because it had a critical empty field.")
+            continue
+
         this_director = strip_unprintable(movie_dict['director_name'])
-        this_movie: Movie = Movie(title=strip_unprintable(movie_dict['movie_title']), year=movie_dict['title_year'], score=movie_dict[
-            "imdb_score"])
+        this_movie_title = strip_unprintable(movie_dict['movie_title'])
+        this_movie_year = int(movie_dict['title_year'])
+
+        this_movie_score = float(movie_dict["imdb_score"])
+
+        this_movie: Movie = Movie(title=this_movie_title,
+                                  year=this_movie_year,
+                                  score=this_movie_score)
         movies_by_director.setdefault(this_director, [])
-        movies_by_director[this_director].append(this_movie)
+        if this_movie_year > 1960:
+            movies_by_director[this_director].append(this_movie)
 
     return movies_by_director
 
@@ -45,7 +63,7 @@ def get_movies_by_director():
 def calc_mean_score(movies):
     """Helper method to calculate mean of list of Movie namedtuples,
        round the mean to 1 decimal place"""
-    scores = [float(movie.score) for movie in movies]
+    scores = [movie.score for movie in movies]
     unrounded_mean = statistics.fmean(scores)
     return round(unrounded_mean, 1)
 
