@@ -16,13 +16,6 @@ def get_season_csv_file(season):
         return download.content.decode('utf-8')
 
 
-def cleanup_line(line: str):
-    # Strip newline and remove punctuation.
-    # line = line.rstrip()
-    line = line.translate(str.maketrans('', '', string.punctuation))
-    return line
-
-
 def get_num_words_spoken_by_character_per_episode(content: str):
     """Receives loaded csv content (str) and returns a dict of
        keys=characters and values=Counter object,
@@ -36,7 +29,6 @@ def get_num_words_spoken_by_character_per_episode(content: str):
 
         line = row['Line']
 
-        line = cleanup_line(line)
         word_count = len(line.split())
 
         lines_by_character[row['Character']].update({row['Episode']: word_count})
