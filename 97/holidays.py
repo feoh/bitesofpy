@@ -23,12 +23,11 @@ with open(holidays_page) as f:
 holidays = defaultdict(list)
 
 
-def process_row(holiday_row):
+def process_row(holiday_row) -> tuple:
     holiday_tds: ResultSet = holiday_row.find_all('td')
     date_str = holiday_tds[1].contents[1]['datetime']
-    (yyyy, mm, dd) = date_str.split('-')
     holiday_name = holiday_tds[3].text.strip()
-    holidays[mm].append(holiday_name)
+    return date_str, holiday_name
 
 
 def get_us_bank_holidays(content=content):
@@ -36,6 +35,7 @@ def get_us_bank_holidays(content=content):
        holiday table (css class = list-table), and return a dict of
        keys -> months and values -> list of bank holidays"""
 
+    sorted_holidays = []
     soup = BeautifulSoup(content, 'html5lib')
     holiday_table: bs4.element.Tag = soup.find('table','list-table')
     holiday_rows: ResultSet = holiday_table.find_all('tr', {'class': 'holiday'})
@@ -44,7 +44,14 @@ def get_us_bank_holidays(content=content):
     all_rows: ResultSet = holiday_rows + regional_rows + public_rows
     holiday_row: bs4.element.Tag
     for holiday_row in all_rows:
-        process_row(holiday_row)
+        sorted_holidays.append(process_row(holiday_row))
+
+    sorted_holidays.sort()
+
+    for holiday in sorted_holidays:
+        (yyyy, mm, dd) = holiday[0].split('-')
+        holiday_name = holiday[1]
+        holidays[mm].append(holiday_name)
 
     return holidays
 
