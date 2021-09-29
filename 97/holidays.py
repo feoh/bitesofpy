@@ -23,6 +23,14 @@ with open(holidays_page) as f:
 holidays = defaultdict(list)
 
 
+def process_row(holiday_row):
+    holiday_tds: ResultSet = holiday_row.find_all('td')
+    date_str = holiday_tds[1].contents[1]['datetime']
+    (yyyy, mm, dd) = date_str.split('-')
+    holiday_name = holiday_tds[3].text.strip()
+    holidays[mm].append(holiday_name)
+
+
 def get_us_bank_holidays(content=content):
     """Receive scraped html output, make a BS object, parse the bank
        holiday table (css class = list-table), and return a dict of
@@ -31,15 +39,12 @@ def get_us_bank_holidays(content=content):
     soup = BeautifulSoup(content, 'html5lib')
     holiday_table: bs4.element.Tag = soup.find('table','list-table')
     holiday_rows: ResultSet = holiday_table.find_all('tr', {'class': 'holiday'})
+    regional_rows: ResultSet = holiday_table.find_all('tr', {'class': 'regional'})
+    public_rows: ResultSet = holiday_table.find_all('tr', {'class': 'publicholiday'})
+    all_rows: ResultSet = holiday_rows + regional_rows + public_rows
     holiday_row: bs4.element.Tag
-    for holiday_row in holiday_rows:
-        holiday_tds: ResultSet = holiday_row.find_all('td')
-        # e.. 2018-01-01
-        date_str = holiday_tds[1].contents[1]['datetime']
-        (yyyy, mm, dd) = date_str.split('-')
-        holiday_name = holiday_tds[3].text.strip()
-        # tds have 2018-01-01 and another has "New Year's Day" - what we want.
-        holidays[dd].append(holiday_name)
+    for holiday_row in all_rows:
+        process_row(holiday_row)
 
     return holidays
 
