@@ -5,8 +5,6 @@ from urllib.request import urlretrieve
 
 import bs4.element
 from bs4 import BeautifulSoup, ResultSet, Tag, NavigableString
-import html5lib
-from datetime import datetime
 
 # prep data
 tmp = os.getenv("TMP", "/tmp")
@@ -36,7 +34,7 @@ def get_us_bank_holidays(content=content):
        keys -> months and values -> list of bank holidays"""
 
     sorted_holidays = []
-    soup = BeautifulSoup(content, 'html5lib')
+    soup = BeautifulSoup(content, 'html.parser')
     holiday_table: bs4.element.Tag = soup.find('table','list-table')
     holiday_rows: ResultSet = holiday_table.find_all('tr', {'class': 'holiday'})
     regional_rows: ResultSet = holiday_table.find_all('tr', {'class': 'regional'})
