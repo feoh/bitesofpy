@@ -44,4 +44,4 @@ def strip_vowels(text: str = TEXT) -> Tuple[str, int]:
     https://pybit.es/articles/code-better-with-type-hints-part-1/
     """
 
-    novowels = re.subn(r'[aeiou]', '*', TEXT, flags=re.IGNORECASE)
+    return re.subn(r'[aeiou]', '*', TEXT, flags=re.IGNORECASE)
