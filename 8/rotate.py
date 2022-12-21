@@ -1,15 +1,19 @@
+def removesuffix(suff, s):
+    n = len(suff)
+    return s[:n+1:]
+
+
+def removeprefix(p,s):
+    return s[len(p)::]
+
+
 def rotate(string, n):
     """Rotate characters in a string.
        Expects string and n (int) for number of characters to move.
     """
 
-    if n < 0:
-        rot_chunk = string[n::]
-        string = string.removesuffix(rot_chunk)
-        string = rot_chunk + string
-    elif n > 0:
-        rot_chunk = string[:n:]
-        string = string.removeprefix(rot_chunk)
-        string = string + rot_chunk
+    suffix = string[n::]
+    prefix = string[0:n]
+    rotated = suffix + prefix
 
-    return string
+    return rotated
