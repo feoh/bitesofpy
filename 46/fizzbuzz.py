@@ -2,7 +2,7 @@ from typing import Union
 
 
 def fizzbuzz(num: int) -> Union[str, int]:
-    if num % 3 == 0 and num % 5 == 0:
+    if (num % 3 == 0) and (num % 5 == 0):
         return "Fizz Buzz"
     elif num % 3 == 0:
         return "Fizz"
@@ -10,3 +10,6 @@ def fizzbuzz(num: int) -> Union[str, int]:
         return "Buzz"
     else:
         return num
+
+
+print(fizzbuzz(15))
